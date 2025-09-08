@@ -164,6 +164,12 @@ Analysis: [/INST]"""
                 suggestions.append(f"Line {issue['line']}: Use specific exception types instead of broad exception handling")
             elif issue['type'] == 'StringConcatenation':
                 suggestions.append(f"Line {issue['line']}: Use f-strings for better performance and readability")
+            elif issue['type'] == 'TypeMismatchConcatenation':
+                suggestions.append(f"Line {issue['line']}: Convert number to string or use f-string: str(number) or f'text {{number}}'")
+            elif issue['type'] == 'DivisionByZero':
+                suggestions.append(f"Line {issue['line']}: Add check for zero before division to prevent ZeroDivisionError")
+            elif issue['type'] == 'PossibleUndefinedVariable':
+                suggestions.append(f"Line {issue['line']}: Ensure variable is defined before use")
         
         # Add AI-generated suggestions
         if ai_analysis and "Error generating" not in ai_analysis:

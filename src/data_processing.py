@@ -114,13 +114,59 @@ class CodeDataProcessor:
                     'severity': 'low'
                 })
             
-            if re.search(r'print\(.*\+.*\)', line):
+            # Check for string + number concatenation (TypeError)
+            # Look for patterns like "string" + number or number + "string" but not str(number)
+            if (re.search(r'["\'][^"\']*["\'][^=]*\+[^=]*\d+(?!\))', line) or 
+                re.search(r'\d+[^=]*\+[^=]*["\'][^"\']*["\']', line)) and 'str(' not in line:
+                bugs.append({
+                    'type': 'TypeMismatchConcatenation',
+                    'line': i,
+                    'message': 'Cannot concatenate string and number - will cause TypeError',
+                    'severity': 'high'
+                })
+            
+            # Check for general string concatenation in print statements
+            elif re.search(r'print\(.*\+.*\)', line):
                 bugs.append({
                     'type': 'StringConcatenation',
                     'line': i,
                     'message': 'Consider using f-strings instead of string concatenation',
                     'severity': 'low'
                 })
+            
+            # Check for division by zero potential
+            if re.search(r'/\s*0\s*[^\d]', line) or line.strip().endswith('/ 0'):
+                bugs.append({
+                    'type': 'DivisionByZero',
+                    'line': i,
+                    'message': 'Division by zero will cause ZeroDivisionError',
+                    'severity': 'high'
+                })
+            
+            # Check for using = instead of == in conditions (more comprehensive)
+            if re.search(r'if\s+\w+\s*=\s*\w+', line):
+                bugs.append({
+                    'type': 'AssignmentInCondition',
+                    'line': i,
+                    'message': 'Using assignment (=) instead of comparison (==) in condition',
+                    'severity': 'high'
+                })
+            
+            # Check for undefined variable patterns (basic)
+            if re.search(r'print\(\s*\w+\s*\)', line):
+                # This is a simple check - in practice you'd need more sophisticated analysis
+                var_name = re.search(r'print\(\s*(\w+)\s*\)', line)
+                if var_name:
+                    var = var_name.group(1)
+                    # Check if variable is defined before this line (simple check)
+                    code_before = '\n'.join(lines[:i-1])
+                    if var not in ['True', 'False', 'None'] and not re.search(f'{var}\\s*=', code_before):
+                        bugs.append({
+                            'type': 'PossibleUndefinedVariable',
+                            'line': i,
+                            'message': f'Variable "{var}" may be used before definition',
+                            'severity': 'medium'
+                        })
         
         return bugs
     
