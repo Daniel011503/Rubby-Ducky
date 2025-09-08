@@ -16,7 +16,18 @@ pandas>=2.0.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 
-# Code quality
+# Code quality and analysis
 black>=23.0.0
 flake8>=6.0.0
 pytest>=7.3.0
+pylint>=2.17.0
+ast-tools>=0.1.0
+
+# Web interface for the assistant
+gradio>=3.35.0
+streamlit>=1.23.0
+
+# Additional utilities
+tqdm>=4.65.0
+python-dotenv>=1.0.0
+huggingface_hub>=0.15.0
