@@ -1,0 +1,31 @@
+# Virtual environment
+llama-env/
+venv/
+env/
+
+# Model files (too large for git)
+models/
+*.bin
+*.safetensors
+
+# Data files
+data/raw/
+data/processed/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# System
+.DS_Store
+Thumbs.db
