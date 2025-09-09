@@ -11,7 +11,7 @@
       },
       {
         "id": "cpp_missing_semicolon",
-        "pattern": "[^;{}]\\s*$",
+        "pattern": "DISABLED_PATTERN_THAT_NEVER_MATCHES",
         "message": "Missing semicolon at end of statement",
         "severity": "high",
         "category": "syntax_error",
@@ -29,7 +29,7 @@
       },
       {
         "id": "cpp_memory_leak_new",
-        "pattern": "new\\s+\\w+",
+        "pattern": "=\\s*new\\s+\\w+|\\bnew\\s+\\w+\\s*\\(",
         "message": "Raw new without corresponding delete - potential memory leak",
         "severity": "high",
         "category": "memory_management",
@@ -53,7 +53,7 @@
       },
       {
         "id": "cpp_null_pointer",
-        "pattern": "\\*\\s*\\w+(?!\\s*[=!<>])",
+        "pattern": "DISABLED_OVERLY_BROAD_PATTERN",
         "message": "Potential null pointer dereference",
         "severity": "medium",
         "category": "null_safety",

@@ -3,19 +3,11 @@
     "syntax_patterns": [
       {
         "id": "py_assignment_in_condition",
-        "pattern": "if\\s+\\w+\\s*=\\s*",
-        "message": "Assignment (=) used in condition instead of comparison (==)",
-        "severity": "high",
+        "pattern": "if\\s+.*\\s+=\\s+[^=]",
+        "message": "Possible assignment (=) in condition instead of comparison (==)",
+        "severity": "medium",
         "category": "syntax_error",
-        "suggestion": "Use == for comparison or wrap assignment in parentheses if intentional"
-      },
-      {
-        "id": "py_missing_colon",
-        "pattern": "(?:if|for|while|def|class|try|except|finally|with)\\s+[^:]+$",
-        "message": "Missing colon at end of statement",
-        "severity": "high",
-        "category": "syntax_error",
-        "suggestion": "Add ':' at the end of the statement"
+        "suggestion": "Check if you meant to use == for comparison"
       }
     ],
     "bug_patterns": [

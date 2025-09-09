@@ -19,7 +19,7 @@
       },
       {
         "id": "sql_injection_risk",
-        "pattern": "(?i)(select|insert|update|delete).*\\+.*[\"']",
+        "pattern": "(?i)(select|insert|update|delete)\\s+.*\\+.*[\"'].*\\s+(from|into|set|where)",
         "message": "Potential SQL injection vulnerability",
         "severity": "high",
         "category": "security",

@@ -1,0 +1,80 @@
+{
+  "rust": {
+    "syntax_patterns": [
+      {
+        "id": "rust_semicolon_missing",
+        "pattern": "return\\s+[^;\\n]+$",
+        "message": "Missing semicolon after return statement",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add semicolon or remove 'return' for expression"
+      },
+      {
+        "id": "rust_mut_required",
+        "pattern": "let\\s+\\w+\\s*=.*\\n.*\\1\\s*=",
+        "message": "Variable reassignment requires 'mut' keyword",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add 'mut' keyword to variable declaration"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "rust_unwrap_panic",
+        "pattern": "\\.unwrap\\s*\\(",
+        "message": "unwrap() can panic, consider using pattern matching",
+        "severity": "medium",
+        "category": "error_handling",
+        "suggestion": "Use pattern matching, expect(), or proper error handling"
+      },
+      {
+        "id": "rust_clone_unnecessary",
+        "pattern": "\\.clone\\s*\\(",
+        "message": "Unnecessary clone, consider borrowing",
+        "severity": "low",
+        "category": "performance",
+        "suggestion": "Use references (&) instead of cloning when possible"
+      },
+      {
+        "id": "rust_index_bounds",
+        "pattern": "\\[\\d+\\]",
+        "message": "Direct indexing can panic, consider get()",
+        "severity": "medium",
+        "category": "bounds_checking",
+        "suggestion": "Use .get() method for safe indexing"
+      },
+      {
+        "id": "rust_memory_leak",
+        "pattern": "Box::leak\\s*\\(",
+        "message": "Memory leak detected",
+        "severity": "high",
+        "category": "memory_management",
+        "suggestion": "Ensure proper memory cleanup or use reference counting"
+      },
+      {
+        "id": "rust_unsafe_block",
+        "pattern": "unsafe\\s*\\{",
+        "message": "Unsafe block requires careful review",
+        "severity": "high",
+        "category": "memory_safety",
+        "suggestion": "Ensure memory safety invariants are maintained"
+      },
+      {
+        "id": "rust_infinite_loop",
+        "pattern": "loop\\s*\\{[^}]*\\}",
+        "message": "Potential infinite loop without break",
+        "severity": "medium",
+        "category": "logic_error",
+        "suggestion": "Add break condition or proper exit mechanism"
+      },
+      {
+        "id": "rust_unused_result",
+        "pattern": "\\w+\\s*\\([^)]*\\)\\s*;",
+        "message": "Result type should be handled",
+        "severity": "medium",
+        "category": "error_handling",
+        "suggestion": "Handle Result with pattern matching or unwrap variants"
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 """
-Main runner for the AI Coding Assistant.
+Main runner for Rubby Ducky - The Rubber Duck Debugging Assistant.
 """
 
 import argparse
@@ -11,10 +11,9 @@ from typing import List
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.multi_language_processor import MultiLanguageCodeProcessor
-from src.training import CodeLlamaTrainer
 
 
-def run_analysis(code_file: str, model_name: str = "codellama/CodeLlama-7b-Python-hf", language: str = "python"):
+def run_analysis(code_file: str, model_name: str = "microsoft/codebert-base", language: str = "python"):
     """Run code analysis on a file."""
     print(f"Analyzing {language} code in: {code_file}")
     
@@ -32,17 +31,52 @@ def run_analysis(code_file: str, model_name: str = "codellama/CodeLlama-7b-Pytho
         # Get AI analysis with ML models and rule-based detection
         if processor.use_ml_model:
             ml_result = processor.predict_bugs_ml(code)
+            
+            # Get rule-based analysis first to inform AI classification
+            syntax_errors = processor.detect_syntax_errors(code, language)
+            common_bugs = processor.detect_common_bugs(code, language)
+            
+            # Calculate issue severity
+            high_severity_count = len(syntax_errors)
+            medium_severity_count = sum(1 for bug in common_bugs if bug.get('severity') == 'medium')
+            low_severity_count = sum(1 for bug in common_bugs if bug.get('severity') == 'low')
+            
+            # Intelligent classification combining ML and rule-based findings
+            if high_severity_count > 0:
+                # Syntax errors = definitely buggy
+                final_prediction = 'buggy'
+                final_confidence = min(0.9, 0.7 + (high_severity_count * 0.1))
+            elif medium_severity_count > 5:
+                # Many medium issues = likely buggy
+                final_prediction = 'buggy'
+                final_confidence = min(0.8, 0.6 + (medium_severity_count * 0.03))
+            elif low_severity_count > 0 and medium_severity_count <= 1:
+                # Only minor issues or at most 1 medium issue = clean
+                final_prediction = 'clean'
+                final_confidence = max(0.85, 1.0 - (low_severity_count * 0.02) - (medium_severity_count * 0.05))
+            elif high_severity_count == 0 and medium_severity_count == 0 and low_severity_count == 0:
+                # No issues found = clean unless ML is very confident
+                if ml_result['prediction'] == 'buggy' and ml_result['confidence'] > 0.7:
+                    final_prediction = 'buggy'
+                    final_confidence = ml_result['confidence']
+                else:
+                    final_prediction = 'clean'
+                    final_confidence = max(0.90, 1.0 - ml_result['buggy_probability'])
+            else:
+                # Use ML prediction for borderline cases
+                final_prediction = ml_result['prediction']
+                final_confidence = ml_result['confidence']
+            
             ai_insights = {
-                'prediction': ml_result['prediction'],
-                'confidence': ml_result['confidence'],
+                'prediction': final_prediction,
+                'confidence': final_confidence,
                 'ml_available': True
             }
         else:
             ai_insights = {'ml_available': False}
-        
-        # Get rule-based analysis
-        syntax_errors = processor.detect_syntax_errors(code, language)
-        common_bugs = processor.detect_common_bugs(code, language)
+            # Get rule-based analysis
+            syntax_errors = processor.detect_syntax_errors(code, language)
+            common_bugs = processor.detect_common_bugs(code, language)
         
         print("\n" + "="*50)
         print(f"{language.upper()} AI-ENHANCED CODE ANALYSIS REPORT")
@@ -154,53 +188,39 @@ def run_training(output_dir: str, epochs: int = 3, languages: List[str] = None, 
                 
                 if load_datasets:
                     print(f"\n📊 Loading datasets for {lang}...")
-                    datasets = processor.load_bug_detection_datasets()
-                    
-                    if datasets:
-                        print(f"\n✅ Available datasets for {lang}:")
-                        for name, dataset in datasets.items():
-                            print(f"  - {name}: {len(dataset)} samples")
-                            
-                            # Show sample data
-                            if len(dataset) > 0:
-                                sample = dataset[0]
-                                print(f"    Sample keys: {list(sample.keys())}")
-                    else:
-                        print(f"❌ No datasets found for {lang}")
+                    # Note: Dataset loading functionality needs to be implemented
+                    print(f"⚠️ Dataset loading for {lang} is not yet implemented.")
+                    print("This would require integration with bug detection datasets like:")
+                    print("  - Defects4J for Java")
+                    print("  - CodeXGLUE for multi-language")
+                    print("  - GitHub bug fix commits")
                 
                 if train_ml:
                     print(f"\n🎯 Training ML bug classifier for {lang}...")
-                    datasets = processor.load_bug_detection_datasets()
-                    processor.train_bug_classifier(datasets)
+                    print(f"⚠️ ML training for {lang} is not yet implemented.")
+                    print("This would require:")
+                    print("  - Curated training datasets")
+                    print("  - Fine-tuning CodeBERT models")
+                    print("  - Validation and evaluation")
                     
-                results.append(f"✅ {lang}: ML training completed")
+                results.append(f"ℹ️ {lang}: Training setup acknowledged (implementation pending)")
                 
             except Exception as e:
                 error_msg = f"❌ {lang}: Error - {e}"
                 print(error_msg)
                 results.append(error_msg)
-    
-    # Traditional LLM training
-    if not train_ml:
+    else:
         print("\n" + "="*60)
-        print("🦙 TRADITIONAL LLM TRAINING (CodeLlama)")
+        print("ℹ️ TRAINING INFORMATION")
         print("="*60)
+        print("To implement full training capabilities, you would need:")
+        print("1. Bug detection datasets (Defects4J, CodeXGLUE)")
+        print("2. Fine-tuning pipeline for CodeBERT")
+        print("3. Training/validation/test splits")
+        print("4. Model evaluation metrics")
+        print("\nCurrently using pre-trained CodeBERT models.")
         
-        trainer = CodeLlamaTrainer()
-        
-        # Update trainer to support multiple languages
-        if len(languages) > 1:
-            print("⚠️ Multi-language LLM training not fully implemented yet.")
-            print("Training on Python for now...")
-        
-        trainer.train(
-            output_dir=output_dir,
-            num_epochs=epochs,
-            batch_size=2,
-            learning_rate=2e-4
-        )
-        
-        results.append("✅ CodeLlama training completed")
+        results.append("ℹ️ Training information provided")
     
     print("\n" + "="*60)
     print("📊 TRAINING SUMMARY")
@@ -213,8 +233,8 @@ def run_training(output_dir: str, epochs: int = 3, languages: List[str] = None, 
 
 def run_web_interface(port: int = 8501):
     """Launch the Streamlit web interface."""
-    print(f"Launching Streamlit web interface on port {port}")
-    print(f"Access at: http://localhost:{port}")
+    print(f"🦆 Launching Rubby Ducky web interface on port {port}")
+    print(f"🌐 Access at: http://localhost:{port}")
     
     # Import subprocess to run streamlit
     import subprocess
@@ -223,28 +243,34 @@ def run_web_interface(port: int = 8501):
     # Get the python executable path
     python_exe = sys.executable
     
-    # Run streamlit with the specified port
-    subprocess.run([
-        python_exe, "-m", "streamlit", "run", 
-        "src/streamlit_app.py", 
-        "--server.port", str(port),
-        "--server.address", "0.0.0.0"
-    ])
+    # Run streamlit with the correct app file
+    try:
+        subprocess.run([
+            python_exe, "-m", "streamlit", "run", 
+            "src/streamlit_app_clean.py", 
+            "--server.port", str(port),
+            "--server.address", "0.0.0.0"
+        ])
+    except KeyboardInterrupt:
+        print("\n👋 Rubby Ducky web interface stopped.")
+    except Exception as e:
+        print(f"❌ Error launching web interface: {e}")
+        print("Make sure streamlit is installed: pip install streamlit")
 
 
 def main():
     """Main function with command line interface."""
-    parser = argparse.ArgumentParser(description="AI Coding Assistant - Bug Detection and Debugging")
+    parser = argparse.ArgumentParser(description="Rubby Ducky - Rubber Duck Debugging Assistant with Bug Detection")
     
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
     
     # Analyze command
     analyze_parser = subparsers.add_parser('analyze', help='Analyze a code file for bugs')
     analyze_parser.add_argument('file', help='Code file to analyze')
-    analyze_parser.add_argument('--model', default='codellama/CodeLlama-7b-Python-hf', help='Model to use')
+    analyze_parser.add_argument('--model', default='microsoft/codebert-base', help='Model to use for AI analysis')
     analyze_parser.add_argument('--language', '--lang', default='python', 
                                choices=['python', 'javascript', 'java', 'cpp', 'csharp', 'go', 'rust'],
-                               help='Programming language of the file')
+                               help='Programming language: python, javascript, java, cpp (C++), csharp (C#), go, rust')
     
     # Train command
     train_parser = subparsers.add_parser('train', help='Train the model on coding datasets')
@@ -252,7 +278,7 @@ def main():
     train_parser.add_argument('--epochs', type=int, default=3, help='Number of training epochs')
     train_parser.add_argument('--languages', nargs='+', default=['python'],
                              choices=['python', 'javascript', 'java', 'cpp', 'csharp', 'go', 'rust'],
-                             help='Programming languages to train on')
+                             help='Programming languages: python, javascript, java, cpp (C++), csharp (C#), go, rust')
     train_parser.add_argument('--train-ml', action='store_true', 
                              help='Train ML bug detection models (requires datasets)')
     train_parser.add_argument('--load-datasets', action='store_true',
@@ -287,9 +313,8 @@ def main():
         run_web_interface(args.port)
     
     elif args.command == 'demo':
-        # Create a demo file
-        demo_code = '''
-def calculate_average(numbers):
+        # Create a demo file with intentional bugs
+        demo_code = '''def calculate_average(numbers):
     if len(numbers) = 0:  # Bug: assignment instead of comparison
         return 0
     
@@ -314,15 +339,18 @@ def process_data(data):
 '''
         
         # Save demo code to temporary file
-        demo_file = 'demo_code.py'
+        demo_file = 'demo_code_buggy.py'
         with open(demo_file, 'w') as f:
             f.write(demo_code)
         
-        print("Running demo analysis...")
-        run_analysis(demo_file)
+        print("🦆 Running Rubby Ducky demo analysis...")
+        print("This demo shows how Rubby Ducky detects bugs in Python code.\n")
+        run_analysis(demo_file, language='python')
         
         # Clean up
         os.remove(demo_file)
+        print(f"\n✨ Demo completed! Try 'python main.py web' to launch the web interface.")
+        print("Or analyze your own files with: python main.py analyze <file> --language <lang>")
     
     else:
         parser.print_help()

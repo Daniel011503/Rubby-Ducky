@@ -1,0 +1,80 @@
+{
+  "csharp": {
+    "syntax_patterns": [
+      {
+        "id": "cs_assignment_in_condition",
+        "pattern": "if\\s*\\(\\s*\\w+\\s*=\\s*[^=]",
+        "message": "Assignment (=) used in condition instead of comparison (==)",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Use == for comparison or wrap assignment in parentheses if intentional"
+      },
+      {
+        "id": "cs_missing_semicolon",
+        "pattern": "DISABLED_PATTERN_THAT_NEVER_MATCHES",
+        "message": "Missing semicolon at end of statement",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add semicolon at the end of the statement"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "cs_null_reference",
+        "pattern": "\\.\\w+\\(",
+        "message": "Potential null reference exception",
+        "severity": "medium",
+        "category": "null_safety",
+        "suggestion": "Use null-conditional operators (?.) or null checks"
+      },
+      {
+        "id": "cs_dispose_pattern",
+        "pattern": "new\\s+\\w+\\s*\\(",
+        "message": "IDisposable object should be used in using statement",
+        "severity": "medium",
+        "category": "resource_management",
+        "suggestion": "Use 'using' statement for automatic disposal"
+      },
+      {
+        "id": "cs_string_concatenation",
+        "pattern": "\\+\\s*\".*\"|\".*\"\\s*\\+",
+        "message": "String concatenation can be inefficient",
+        "severity": "low",
+        "category": "performance",
+        "suggestion": "Use StringBuilder or string interpolation ($\"...\")"
+      },
+      {
+        "id": "cs_equals_override",
+        "pattern": "public\\s+override\\s+bool\\s+Equals\\s*\\(",
+        "message": "Override GetHashCode() when overriding Equals()",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Always override GetHashCode() when overriding Equals()"
+      },
+      {
+        "id": "cs_exception_swallowing",
+        "pattern": "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}",
+        "message": "Empty catch block swallows exceptions",
+        "severity": "high",
+        "category": "error_handling",
+        "suggestion": "Handle exceptions appropriately or rethrow"
+      },
+      {
+        "id": "cs_finalize_method",
+        "pattern": "~\\w+\\s*\\(",
+        "message": "Finalizers should be avoided in favor of IDisposable",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Implement IDisposable pattern instead"
+      },
+      {
+        "id": "cs_thread_sleep",
+        "pattern": "Thread\\.Sleep\\s*\\(",
+        "message": "Thread.Sleep should be avoided in async code",
+        "severity": "medium",
+        "category": "concurrency",
+        "suggestion": "Use await Task.Delay() for async operations"
+      }
+    ]
+  }
+}

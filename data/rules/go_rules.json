@@ -1,0 +1,80 @@
+{
+  "go": {
+    "syntax_patterns": [
+      {
+        "id": "go_semicolon_required",
+        "pattern": "\\s+;\\s*$",
+        "message": "Unnecessary semicolon in Go",
+        "severity": "low",
+        "category": "syntax_error",
+        "suggestion": "Remove semicolon, Go automatically inserts them"
+      },
+      {
+        "id": "go_capitalization",
+        "pattern": "^[a-z]\\w*\\s*:=\\s*func\\s*\\(",
+        "message": "Function name should start with capital letter for export",
+        "severity": "medium",
+        "category": "syntax_error",
+        "suggestion": "Capitalize function name for public access"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "go_nil_dereference",
+        "pattern": "\\.\\w+\\s*\\(",
+        "message": "Potential nil pointer dereference",
+        "severity": "high",
+        "category": "null_safety",
+        "suggestion": "Check for nil before dereferencing pointers"
+      },
+      {
+        "id": "go_goroutine_leak",
+        "pattern": "go\\s+\\w+\\s*\\(",
+        "message": "Potential goroutine leak",
+        "severity": "medium",
+        "category": "concurrency",
+        "suggestion": "Ensure goroutines can exit properly"
+      },
+      {
+        "id": "go_error_not_checked",
+        "pattern": "_,\\s*err\\s*:=",
+        "message": "Error not handled",
+        "severity": "high",
+        "category": "error_handling",
+        "suggestion": "Always check and handle errors"
+      },
+      {
+        "id": "go_unused_variable",
+        "pattern": "\\w+\\s*:=\\s*[^\\n]*\\n(?!.*\\1)",
+        "message": "Variable declared but not used",
+        "severity": "medium",
+        "category": "unused_code",
+        "suggestion": "Remove unused variable or use underscore for intentional discard"
+      },
+      {
+        "id": "go_infinite_loop",
+        "pattern": "for\\s*\\{[^}]*\\}",
+        "message": "Potential infinite loop without break condition",
+        "severity": "medium",
+        "category": "logic_error",
+        "suggestion": "Add break condition or proper exit mechanism"
+      },
+      {
+        "id": "go_slice_bounds",
+        "pattern": "\\[\\d+:\\d+\\]",
+        "message": "Potential slice bounds error",
+        "severity": "medium",
+        "category": "bounds_checking",
+        "suggestion": "Check slice length before accessing indices"
+      },
+      {
+        "id": "go_string_format",
+        "pattern": "fmt\\.Sprint[f]?\\s*\\(",
+        "message": "Consider using specific format verbs",
+        "severity": "low",
+        "category": "performance",
+        "suggestion": "Use appropriate format verbs like %s, %d, %v for better performance"
+      }
+    ]
+  }
+}

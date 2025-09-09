@@ -1,5 +1,5 @@
 """
-Multi-language data processing module for the coding assistant.
+Multi-language data processing module for Rubby Ducky - The Rubber Duck Debugging Assistant.
 Supports Python, JavaScript, Java, C++, and more languages.
 Uses real ML models and comprehensive bug databases with rule-based static analysis.
 """

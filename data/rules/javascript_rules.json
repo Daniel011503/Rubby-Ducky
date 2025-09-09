@@ -11,11 +11,11 @@
       },
       {
         "id": "js_missing_semicolon",
-        "pattern": "[^;{}]\\s*$",
-        "message": "Missing semicolon at end of statement",
-        "severity": "medium",
-        "category": "syntax_style",
-        "suggestion": "Add semicolon at the end of the statement"
+        "pattern": "^\\s*(?:var|let|const|return)\\s+[^;{}]+[^;{}\\s]\\s*$",
+        "message": "Consider adding semicolon at end of statement",
+        "severity": "low",
+        "category": "syntax_style", 
+        "suggestion": "Add semicolon at the end of the statement for consistency"
       }
     ],
     "bug_patterns": [
