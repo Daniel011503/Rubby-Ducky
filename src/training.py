@@ -245,7 +245,7 @@ class CodeLlamaTrainer:
             gradient_accumulation_steps=4,
             warmup_steps=100,
             logging_steps=10,
-            evaluation_strategy="steps",
+            eval_strategy="steps",  # Changed from evaluation_strategy
             eval_steps=50,
             save_steps=100,
             save_total_limit=3,

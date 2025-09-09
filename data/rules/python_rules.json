@@ -1,0 +1,88 @@
+{
+  "python": {
+    "syntax_patterns": [
+      {
+        "id": "py_assignment_in_condition",
+        "pattern": "if\\s+\\w+\\s*=\\s*",
+        "message": "Assignment (=) used in condition instead of comparison (==)",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Use == for comparison or wrap assignment in parentheses if intentional"
+      },
+      {
+        "id": "py_missing_colon",
+        "pattern": "(?:if|for|while|def|class|try|except|finally|with)\\s+[^:]+$",
+        "message": "Missing colon at end of statement",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add ':' at the end of the statement"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "py_eval_usage",
+        "pattern": "eval\\s*\\(",
+        "message": "Use of eval() is dangerous and should be avoided",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use ast.literal_eval() for safe evaluation or avoid dynamic code execution"
+      },
+      {
+        "id": "py_exec_usage",
+        "pattern": "exec\\s*\\(",
+        "message": "Use of exec() is dangerous and should be avoided",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Avoid dynamic code execution or use safer alternatives"
+      },
+      {
+        "id": "py_bare_except",
+        "pattern": "except\\s*:",
+        "message": "Bare except clause catches all exceptions",
+        "severity": "medium",
+        "category": "error_handling",
+        "suggestion": "Specify exception types: except SpecificException:"
+      },
+      {
+        "id": "py_mutable_default",
+        "pattern": "def\\s+\\w+\\([^)]*=\\s*\\[\\]",
+        "message": "Mutable default argument (list)",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Use None as default and create list inside function"
+      },
+      {
+        "id": "py_mutable_default_dict",
+        "pattern": "def\\s+\\w+\\([^)]*=\\s*\\{\\}",
+        "message": "Mutable default argument (dict)",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Use None as default and create dict inside function"
+      },
+      {
+        "id": "py_string_concatenation",
+        "pattern": "\\+\\s*\".*\"|\".*\"\\s*\\+",
+        "message": "String concatenation in loop can be inefficient",
+        "severity": "low",
+        "category": "performance",
+        "suggestion": "Use f-strings or str.join() for better performance"
+      },
+      {
+        "id": "py_global_variable",
+        "pattern": "global\\s+\\w+",
+        "message": "Global variable usage should be minimized",
+        "severity": "low",
+        "category": "design",
+        "suggestion": "Consider passing variables as parameters instead"
+      },
+      {
+        "id": "py_print_statement",
+        "pattern": "print\\s+[^(]",
+        "message": "Python 2 style print statement",
+        "severity": "medium",
+        "category": "compatibility",
+        "suggestion": "Use print() function syntax for Python 3 compatibility"
+      }
+    ]
+  }
+}

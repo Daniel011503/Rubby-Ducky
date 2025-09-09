@@ -1,0 +1,80 @@
+{
+  "java": {
+    "syntax_patterns": [
+      {
+        "id": "java_assignment_in_condition",
+        "pattern": "if\\s*\\(\\s*\\w+\\s*=\\s*[^=]",
+        "message": "Assignment (=) used in condition instead of comparison (==)",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Use == for comparison or wrap assignment in parentheses if intentional"
+      },
+      {
+        "id": "java_missing_semicolon",
+        "pattern": "[^;{}]\\s*$",
+        "message": "Missing semicolon at end of statement",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add semicolon at the end of the statement"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "java_array_off_by_one",
+        "pattern": "i\\s*<=\\s*\\w*\\.length",
+        "message": "Potential off-by-one error: using <= with array.length",
+        "severity": "high",
+        "category": "logic_error",
+        "suggestion": "Use < instead of <= when iterating arrays"
+      },
+      {
+        "id": "java_string_concatenation",
+        "pattern": "\\+\\s*\".*\"|\".*\"\\s*\\+",
+        "message": "String concatenation in loop can be inefficient",
+        "severity": "medium",
+        "category": "performance",
+        "suggestion": "Use StringBuilder for multiple concatenations"
+      },
+      {
+        "id": "java_equals_override",
+        "pattern": "public\\s+boolean\\s+equals\\s*\\(",
+        "message": "Override hashCode() when overriding equals()",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Always override hashCode() when overriding equals()"
+      },
+      {
+        "id": "java_null_check",
+        "pattern": "\\.equals\\s*\\(\\s*\\w+\\s*\\)",
+        "message": "Potential NullPointerException",
+        "severity": "medium",
+        "category": "null_safety",
+        "suggestion": "Check for null before calling equals() or use Objects.equals()"
+      },
+      {
+        "id": "java_resource_leak",
+        "pattern": "new\\s+File(?:Input|Output)Stream",
+        "message": "Potential resource leak - use try-with-resources",
+        "severity": "medium",
+        "category": "resource_management",
+        "suggestion": "Use try-with-resources statement for automatic resource management"
+      },
+      {
+        "id": "java_finalize_method",
+        "pattern": "protected\\s+void\\s+finalize\\s*\\(",
+        "message": "finalize() method is deprecated and unreliable",
+        "severity": "medium",
+        "category": "deprecated",
+        "suggestion": "Use try-with-resources or explicit cleanup methods"
+      },
+      {
+        "id": "java_system_exit",
+        "pattern": "System\\.exit\\s*\\(",
+        "message": "System.exit() should be avoided in most cases",
+        "severity": "medium",
+        "category": "design",
+        "suggestion": "Let the application terminate naturally or throw exceptions"
+      }
+    ]
+  }
+}

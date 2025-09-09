@@ -11,6 +11,7 @@ models/
 # Data files
 data/raw/
 data/processed/
+# Keep data/rules/ - these are essential configuration files
 
 # Python
 __pycache__/

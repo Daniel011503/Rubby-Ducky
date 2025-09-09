@@ -1,0 +1,74 @@
+{
+  "common_patterns": {
+    "security": [
+      {
+        "id": "hardcoded_password",
+        "pattern": "(?i)(password|pwd|pass)\\s*=\\s*[\"'][^\"']+[\"']",
+        "message": "Hardcoded password detected",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use environment variables or secure configuration files"
+      },
+      {
+        "id": "hardcoded_api_key",
+        "pattern": "(?i)(api[_-]?key|apikey|secret[_-]?key)\\s*=\\s*[\"'][^\"']+[\"']",
+        "message": "Hardcoded API key detected",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use environment variables or secure configuration"
+      },
+      {
+        "id": "sql_injection_risk",
+        "pattern": "(?i)(select|insert|update|delete).*\\+.*[\"']",
+        "message": "Potential SQL injection vulnerability",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use parameterized queries or prepared statements"
+      }
+    ],
+    "performance": [
+      {
+        "id": "inefficient_loop",
+        "pattern": "for\\s*\\([^)]*\\.length[^)]*\\)",
+        "message": "Accessing length property in loop condition",
+        "severity": "low",
+        "category": "performance",
+        "suggestion": "Cache the length value outside the loop"
+      },
+      {
+        "id": "nested_loops",
+        "pattern": "for\\s*\\([^{]*\\{[^}]*for\\s*\\(",
+        "message": "Nested loops detected - consider optimization",
+        "severity": "medium",
+        "category": "performance",
+        "suggestion": "Consider algorithm optimization or data structure changes"
+      }
+    ],
+    "maintainability": [
+      {
+        "id": "long_line",
+        "pattern": ".{120,}",
+        "message": "Line too long (>120 characters)",
+        "severity": "low",
+        "category": "style",
+        "suggestion": "Break long lines for better readability"
+      },
+      {
+        "id": "magic_number",
+        "pattern": "\\b(?!0|1)\\d{2,}\\b",
+        "message": "Magic number detected",
+        "severity": "low",
+        "category": "maintainability",
+        "suggestion": "Use named constants instead of magic numbers"
+      },
+      {
+        "id": "todo_comment",
+        "pattern": "(?i)(todo|fixme|hack|bug):",
+        "message": "TODO/FIXME comment found",
+        "severity": "low",
+        "category": "maintainability",
+        "suggestion": "Address TODO items before production"
+      }
+    ]
+  }
+}

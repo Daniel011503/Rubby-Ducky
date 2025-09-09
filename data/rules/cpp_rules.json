@@ -1,0 +1,80 @@
+{
+  "cpp": {
+    "syntax_patterns": [
+      {
+        "id": "cpp_assignment_in_condition",
+        "pattern": "if\\s*\\(\\s*\\w+\\s*=\\s*[^=]",
+        "message": "Assignment (=) used in condition instead of comparison (==)",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Use == for comparison or wrap assignment in parentheses if intentional"
+      },
+      {
+        "id": "cpp_missing_semicolon",
+        "pattern": "[^;{}]\\s*$",
+        "message": "Missing semicolon at end of statement",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Add semicolon at the end of the statement"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "cpp_array_off_by_one",
+        "pattern": "i\\s*<=\\s*\\w*\\.size\\(\\)",
+        "message": "Potential off-by-one error: using <= with container.size()",
+        "severity": "high",
+        "category": "logic_error",
+        "suggestion": "Use < instead of <= when iterating containers"
+      },
+      {
+        "id": "cpp_memory_leak_new",
+        "pattern": "new\\s+\\w+",
+        "message": "Raw new without corresponding delete - potential memory leak",
+        "severity": "high",
+        "category": "memory_management",
+        "suggestion": "Use smart pointers (std::unique_ptr, std::shared_ptr) or RAII"
+      },
+      {
+        "id": "cpp_buffer_overflow",
+        "pattern": "strcpy\\s*\\(|strcat\\s*\\(",
+        "message": "strcpy/strcat can cause buffer overflow",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use safer alternatives like strncpy or std::string"
+      },
+      {
+        "id": "cpp_gets_function",
+        "pattern": "gets\\s*\\(",
+        "message": "gets() is unsafe and deprecated",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use fgets() or std::getline() instead"
+      },
+      {
+        "id": "cpp_null_pointer",
+        "pattern": "\\*\\s*\\w+(?!\\s*[=!<>])",
+        "message": "Potential null pointer dereference",
+        "severity": "medium",
+        "category": "null_safety",
+        "suggestion": "Check pointer for null before dereferencing"
+      },
+      {
+        "id": "cpp_array_bounds",
+        "pattern": "\\[\\s*\\w+\\s*\\](?!\\s*=)",
+        "message": "Potential array bounds violation",
+        "severity": "medium",
+        "category": "bounds_checking",
+        "suggestion": "Ensure array index is within bounds"
+      },
+      {
+        "id": "cpp_dangling_pointer",
+        "pattern": "delete\\s+\\w+",
+        "message": "Potential dangling pointer after delete",
+        "severity": "medium",
+        "category": "memory_management",
+        "suggestion": "Set pointer to nullptr after delete"
+      }
+    ]
+  }
+}

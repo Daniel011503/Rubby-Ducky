@@ -1,0 +1,80 @@
+{
+  "javascript": {
+    "syntax_patterns": [
+      {
+        "id": "js_assignment_in_condition",
+        "pattern": "if\\s*\\(\\s*\\w+\\s*=\\s*[^=]",
+        "message": "Assignment (=) used in condition instead of comparison (== or ===)",
+        "severity": "high",
+        "category": "syntax_error",
+        "suggestion": "Use === for strict comparison or == for loose comparison"
+      },
+      {
+        "id": "js_missing_semicolon",
+        "pattern": "[^;{}]\\s*$",
+        "message": "Missing semicolon at end of statement",
+        "severity": "medium",
+        "category": "syntax_style",
+        "suggestion": "Add semicolon at the end of the statement"
+      }
+    ],
+    "bug_patterns": [
+      {
+        "id": "js_eval_usage",
+        "pattern": "eval\\s*\\(",
+        "message": "Use of eval() is dangerous and should be avoided",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use JSON.parse() for JSON data or safer alternatives"
+      },
+      {
+        "id": "js_var_declaration",
+        "pattern": "var\\s+\\w+",
+        "message": "Consider using let or const instead of var",
+        "severity": "low",
+        "category": "modern_syntax",
+        "suggestion": "Use 'let' for variables or 'const' for constants"
+      },
+      {
+        "id": "js_array_off_by_one",
+        "pattern": "i\\s*<=\\s*\\w*\\.length",
+        "message": "Potential off-by-one error: using <= with array.length",
+        "severity": "high",
+        "category": "logic_error",
+        "suggestion": "Use < instead of <= when iterating arrays"
+      },
+      {
+        "id": "js_equality_operator",
+        "pattern": "[^=!]={2}[^=]",
+        "message": "Use === instead of == for strict equality",
+        "severity": "medium",
+        "category": "best_practice",
+        "suggestion": "Use === for type-safe comparison"
+      },
+      {
+        "id": "js_function_constructor",
+        "pattern": "new\\s+Function\\s*\\(",
+        "message": "Function constructor can be dangerous",
+        "severity": "high",
+        "category": "security",
+        "suggestion": "Use regular function declarations or expressions"
+      },
+      {
+        "id": "js_with_statement",
+        "pattern": "with\\s*\\(",
+        "message": "with statement is deprecated and should be avoided",
+        "severity": "medium",
+        "category": "deprecated",
+        "suggestion": "Use explicit object property access instead"
+      },
+      {
+        "id": "js_innerHTML",
+        "pattern": "\\.innerHTML\\s*=",
+        "message": "innerHTML assignment can lead to XSS vulnerabilities",
+        "severity": "medium",
+        "category": "security",
+        "suggestion": "Use textContent or proper sanitization"
+      }
+    ]
+  }
+}

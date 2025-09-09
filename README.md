@@ -34,12 +34,15 @@ pip install -r requirements.txt
 ### 2. Usage Options
 
 #### Option A: Web Interface (Recommended)
+
 ```bash
 python main.py web
 ```
+
 Then open http://localhost:7860 in your browser.
 
 #### Option B: Command Line Analysis
+
 ```bash
 # Analyze a specific Python file
 python main.py analyze your_code.py
@@ -49,6 +52,7 @@ python main.py demo
 ```
 
 #### Option C: Direct Python Usage
+
 ```python
 from src.inference import CodingAssistant
 
@@ -68,23 +72,25 @@ result = assistant.analyze_code(code)
 ## 🧠 How It Works
 
 ### 1. Static Analysis
+
 - **Syntax Error Detection**: Uses Python AST to find syntax issues
 - **Pattern Matching**: Identifies common bugs like assignment in conditions
 - **Code Quality**: Checks for best practices violations
 
 ### 2. AI Analysis
+
 - **Model**: Uses CodeLlama-7b-Python specialized for code understanding
 - **Datasets**: Trained on CodeSearchNet, CodeAlpaca, and GitHub code
 - **Techniques**: Fine-tuning with LoRA for efficient training
 
 ### 3. Bug Categories Detected
 
-| Category | Examples | Severity |
-|----------|----------|----------|
-| Syntax Errors | Missing colons, wrong indentation | High |
-| Logic Errors | Assignment vs comparison (= vs ==) | Medium |
-| Exception Handling | Bare except clauses | Low |
-| Code Style | String concatenation vs f-strings | Low |
+| Category           | Examples                           | Severity |
+| ------------------ | ---------------------------------- | -------- |
+| Syntax Errors      | Missing colons, wrong indentation  | High     |
+| Logic Errors       | Assignment vs comparison (= vs ==) | Medium   |
+| Exception Handling | Bare except clauses                | Low      |
+| Code Style         | String concatenation vs f-strings  | Low      |
 
 ## 📁 Project Structure
 
@@ -117,6 +123,7 @@ python main.py train --output ./models/my-coding-assistant --epochs 5
 ### Configuration
 
 The assistant supports various Llama models:
+
 - `codellama/CodeLlama-7b-Python-hf` (recommended)
 - `codellama/CodeLlama-13b-Python-hf` (larger, better quality)
 - `meta-llama/Llama-2-7b-chat-hf` (general purpose)
@@ -140,11 +147,13 @@ debug_help = assistant.debug_code(buggy_code, error_message)
 ## 🛠️ Development
 
 ### Running Tests
+
 ```bash
 pytest tests/
 ```
 
 ### Code Quality
+
 ```bash
 # Format code
 black src/ main.py
@@ -167,12 +176,12 @@ mypy src/ main.py
 
 ### System Requirements
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| RAM | 8GB | 16GB+ |
-| GPU | None (CPU mode) | 8GB+ VRAM |
-| Storage | 2GB | 10GB+ |
-| Python | 3.8+ | 3.9+ |
+| Component | Minimum         | Recommended |
+| --------- | --------------- | ----------- |
+| RAM       | 8GB             | 16GB+       |
+| GPU       | None (CPU mode) | 8GB+ VRAM   |
+| Storage   | 2GB             | 10GB+       |
+| Python    | 3.8+            | 3.9+        |
 
 ### Benchmarks
 
@@ -184,6 +193,7 @@ mypy src/ main.py
 ## 🎯 Examples
 
 ### Example 1: Syntax Error Detection
+
 ```python
 # Input code with bug
 def calculate(x, y)  # Missing colon
@@ -203,6 +213,7 @@ def calculate(x, y)  # Missing colon
 ```
 
 ### Example 2: Logic Error Detection
+
 ```python
 # Input code with bug
 if user_age = 18:  # Assignment instead of comparison
@@ -230,6 +241,7 @@ if user_age = 18:  # Assignment instead of comparison
 5. Open a Pull Request
 
 ### Development Setup
+
 ```bash
 # Install development dependencies
 pip install -r requirements.txt
