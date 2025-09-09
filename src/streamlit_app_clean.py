@@ -10,6 +10,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.multi_language_processor import MultiLanguageCodeProcessor
+from src.rubby_chat import RubbyChatBot
 import json
 
 
@@ -106,41 +107,101 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.header("🛠️ Analysis Options")
+        st.header("🛠️ Navigation")
         
-        # Language selection
-        language = st.selectbox(
-            "Programming Language",
-            ["Python", "JavaScript", "Java", "C++", "C#", "Go", "Rust"],
+        # Mode selection
+        mode = st.radio(
+            "Choose Mode:",
+            ["🔍 Code Analysis", "💬 Chat with Rubby", "📚 Learning Hub"],
             index=0,
-            key="language_selector",
-            help="All languages now support full AI analysis!"
-        )
-        
-        analysis_type = st.selectbox(
-            "Analysis Type",
-            ["🤖 AI Analysis (Neural Networks + Rules)", "⚡ Static Analysis (Rules Only)"],
-            key="analysis_type_selector",
-            help="AI analysis combines neural networks with rule-based detection for maximum accuracy"
+            help="Switch between code analysis and interactive debugging chat"
         )
         
         st.markdown("---")
         
-        # Quick examples section
-        st.subheader("📝 Quick Examples")
+        if mode == "🔍 Code Analysis":
+            st.header("⚙️ Analysis Options")
+            
+            # Language selection
+            language = st.selectbox(
+                "Programming Language",
+                ["Python", "JavaScript", "Java", "C++", "C#", "Go", "Rust"],
+                index=0,
+                key="language_selector",
+                help="All languages now support full AI analysis!"
+            )
+            
+            analysis_type = st.selectbox(
+                "Analysis Type",
+                ["🤖 AI Analysis (Neural Networks + Rules)", "⚡ Static Analysis (Rules Only)"],
+                key="analysis_type_selector",
+                help="AI analysis combines neural networks with rule-based detection for maximum accuracy"
+            )
+            
+            st.markdown("---")
+            
+            # Quick examples section
+            st.subheader("📝 Quick Examples")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📋 Load Clean Code", key="load_clean"):
+                    st.session_state.code_input = get_example_code(language, buggy=False)
+                    st.success("✅ Clean code loaded!")
+                    st.rerun()
+                    
+            with col2:
+                if st.button("🐛 Load Buggy Code", key="load_buggy"):
+                    st.session_state.code_input = get_example_code(language, buggy=True)
+                    st.success("🐛 Buggy code loaded!")
+                    st.rerun()
         
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("📋 Load Clean Code", key="load_clean"):
-                st.session_state.code_input = get_example_code(language, buggy=False)
-                st.success("✅ Clean code loaded!")
+        elif mode == "💬 Chat with Rubby":
+            st.header("🦆 Chat Settings")
+            
+            if st.button("🗑️ Clear Chat History"):
+                if 'chatbot' in st.session_state:
+                    st.session_state.chatbot.clear_conversation()
+                st.success("Chat cleared!")
                 st.rerun()
-                
-        with col2:
-            if st.button("🐛 Load Buggy Code", key="load_buggy"):
-                st.session_state.code_input = get_example_code(language, buggy=True)
-                st.success("🐛 Buggy code loaded!")
-                st.rerun()
+            
+            st.markdown("### 💡 Debugging Tips")
+            st.markdown("""
+            - Explain your code step by step
+            - Describe expected vs actual behavior  
+            - Ask specific questions about logic
+            - Share error messages you're seeing
+            - Discuss your debugging approach
+            """)
+        
+        else:  # Learning Hub
+            st.header("📚 Resources")
+            st.markdown("""
+            **Rubber Duck Debugging:**
+            - Explain code out loud
+            - Walk through logic step by step
+            - Question your assumptions
+            - Identify exact problems
+            
+            **Common Bug Types:**
+            - Syntax errors
+            - Logic mistakes
+            - Off-by-one errors
+            - Null pointer issues
+            - Race conditions
+            """)
+    
+    # Main content area based on selected mode
+    if mode == "🔍 Code Analysis":
+        show_analysis_mode(language, analysis_type)
+    elif mode == "💬 Chat with Rubby":
+        show_chat_mode()
+    else:  # Learning Hub
+        show_learning_hub()
+
+
+def show_analysis_mode(language, analysis_type):
+    """Show the code analysis interface."""
     
     # Main content area
     st.header("🔍 Code Analysis")
@@ -291,7 +352,277 @@ def main():
     # Update session state
     if code_input != st.session_state.get('code_input', ''):
         st.session_state.code_input = code_input
+
+
+def show_chat_mode():
+    """Show the interactive chat interface with Rubby."""
+    st.header("💬 Chat with Rubby")
+    st.markdown("*Have a conversation about your code - true rubber duck debugging!*")
     
+    # Initialize chatbot if not exists
+    if 'chatbot' not in st.session_state:
+        st.session_state.chatbot = RubbyChatBot()
+    
+    chatbot = st.session_state.chatbot
+    
+    # Code context section
+    with st.expander("📝 Share Code for Discussion", expanded=False):
+        st.markdown("Share your code so Rubby can give contextual advice:")
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            chat_language = st.selectbox(
+                "Language",
+                ["Python", "JavaScript", "Java", "C++", "C#", "Go", "Rust"],
+                key="chat_language"
+            )
+        
+        chat_code = st.text_area(
+            "Code to discuss:",
+            height=200,
+            key="chat_code",
+            placeholder="Paste your code here for contextual debugging discussions..."
+        )
+        
+        if st.button("🦆 Set Code Context"):
+            if chat_code.strip():
+                # Quick analysis for context
+                language_map = {
+                    'Python': 'python', 'JavaScript': 'javascript', 'Java': 'java',
+                    'C++': 'cpp', 'C#': 'csharp', 'Go': 'go', 'Rust': 'rust'
+                }
+                internal_lang = language_map.get(chat_language, chat_language.lower())
+                
+                try:
+                    processor = MultiLanguageCodeProcessor(language=internal_lang, use_ml_model=True)
+                    ml_result = processor.predict_bugs_ml(chat_code)
+                    syntax_errors = processor.detect_syntax_errors(chat_code, internal_lang)
+                    common_bugs = processor.detect_common_bugs(chat_code, internal_lang)
+                    
+                    analysis_results = {
+                        'prediction': ml_result.get('prediction', 'unknown'),
+                        'confidence': ml_result.get('confidence', 0.5),
+                        'issues': syntax_errors + common_bugs
+                    }
+                    
+                    chatbot.set_code_context(chat_code, chat_language, analysis_results)
+                    st.success(f"✅ Code context set! Rubby is now familiar with your {chat_language} code.")
+                except Exception as e:
+                    chatbot.set_code_context(chat_code, chat_language)
+                    st.success("✅ Code context set!")
+    
+    # Chat interface
+    st.markdown("### 🗨️ Conversation")
+    
+    # Display conversation history
+    conversation = chatbot.get_conversation_history()
+    
+    # Create a container for the chat history
+    chat_container = st.container()
+    
+    with chat_container:
+        for message in conversation:
+            if message['role'] == 'user':
+                st.chat_message("user").write(message['content'])
+            else:
+                st.chat_message("assistant").write(message['content'])
+    
+    # Chat input
+    user_input = st.chat_input("Ask Rubby about your code, debugging approach, or explain your problem...")
+    
+    if user_input:
+        # Add user message to chat
+        st.chat_message("user").write(user_input)
+        
+        # Get bot response
+        with st.spinner("🦆 Rubby is thinking..."):
+            response = chatbot.chat(user_input)
+        
+        # Add bot response to chat
+        st.chat_message("assistant").write(response)
+        
+        # Rerun to update the conversation display
+        st.rerun()
+    
+    # Debugging suggestions
+    if len(conversation) == 0:
+        st.markdown("### 💡 Rubber Duck Debugging Tips")
+        suggestions = chatbot.get_debugging_suggestions()
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            for suggestion in suggestions[:5]:
+                st.markdown(f"- {suggestion}")
+        with col2:
+            for suggestion in suggestions[5:]:
+                st.markdown(f"- {suggestion}")
+        
+        st.markdown("---")
+        st.info("💬 **Start by saying hello to Rubby!** Describe what you're working on or what issues you're facing.")
+
+
+def show_learning_hub():
+    """Show the learning and resources hub."""
+    st.header("📚 Learning Hub")
+    st.markdown("*Master the art of rubber duck debugging and code quality*")
+    
+    # Rubber Duck Method
+    st.subheader("🦆 The Rubber Duck Method")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        #### **How It Works:**
+        1. **🗣️ Explain Out Loud**: Describe your code line by line
+        2. **❓ Ask Questions**: What should each part do?
+        3. **🔍 Compare**: Expected vs actual behavior
+        4. **💡 Insight**: Often the solution becomes clear!
+        
+        #### **Why It's Effective:**
+        - Forces methodical thinking
+        - Reveals assumptions
+        - Breaks down complex problems
+        - Provides fresh perspective
+        """)
+    
+    with col2:
+        st.markdown("""
+        #### **Best Practices:**
+        - Start with the problem statement
+        - Go step by step through logic
+        - Question every assumption
+        - Don't skip "obvious" parts
+        
+        #### **Common Breakthroughs:**
+        - Off-by-one errors in loops
+        - Variable scope issues
+        - Logic flow problems
+        - Edge case handling
+        """)
+    
+    # Bug Categories
+    st.markdown("---")
+    st.subheader("🐛 Common Bug Categories")
+    
+    bug_categories = {
+        "🔴 Syntax Errors": {
+            "description": "Code that won't compile or run",
+            "examples": ["Missing semicolons", "Unmatched brackets", "Typos in keywords"],
+            "detection": "Usually caught by IDE/compiler"
+        },
+        "🟡 Logic Errors": {
+            "description": "Code runs but produces wrong results",
+            "examples": ["Wrong operators (= vs ==)", "Incorrect conditions", "Algorithm mistakes"],
+            "detection": "Requires testing and analysis"
+        },
+        "🟠 Runtime Errors": {
+            "description": "Code crashes during execution",
+            "examples": ["Null pointer exceptions", "Array out of bounds", "Type mismatches"],
+            "detection": "Occurs during program execution"
+        },
+        "🔵 Performance Issues": {
+            "description": "Code works but inefficiently",
+            "examples": ["Nested loops", "Memory leaks", "Poor algorithms"],
+            "detection": "Profiling and monitoring"
+        },
+        "🟣 Security Vulnerabilities": {
+            "description": "Code has potential security flaws",
+            "examples": ["SQL injection", "XSS vulnerabilities", "Buffer overflows"],
+            "detection": "Security analysis tools"
+        }
+    }
+    
+    for category, details in bug_categories.items():
+        with st.expander(f"{category}: {details['description']}"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Examples:**")
+                for example in details['examples']:
+                    st.markdown(f"• {example}")
+            with col2:
+                st.markdown(f"**Detection:** {details['detection']}")
+    
+    # AI Analysis Insights
+    st.markdown("---")
+    st.subheader("🤖 AI Analysis Insights")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        #### **How Rubby's AI Works:**
+        - **CodeBERT Neural Networks**: Trained on millions of code samples
+        - **Rule-Based Patterns**: 40+ specific detection rules
+        - **Intelligent Classification**: Combines ML + rules for accuracy
+        - **Multi-Language Support**: Specialized models for each language
+        """)
+    
+    with col2:
+        st.markdown("""
+        #### **Confidence Scoring:**
+        - **85-98%**: Very confident code is clean
+        - **70-84%**: Likely clean with minor issues
+        - **50-69%**: Uncertain, needs human review
+        - **Below 50%**: Likely contains bugs
+        """)
+    
+    # Resources and Links
+    st.markdown("---")
+    st.subheader("🔗 Additional Resources")
+    
+    resources = [
+        {"title": "Original Rubber Duck Debugging", "url": "https://en.wikipedia.org/wiki/Rubber_duck_debugging", "description": "The classic debugging technique"},
+        {"title": "Clean Code Principles", "url": "https://github.com/ryanmcdermott/clean-code-javascript", "description": "Best practices for writing maintainable code"},
+        {"title": "Debugging Strategies", "url": "https://blog.hartleybrody.com/debugging-code-beginner/", "description": "Systematic approaches to finding bugs"},
+        {"title": "Code Review Best Practices", "url": "https://github.com/google/eng-practices", "description": "Google's engineering practices for code quality"}
+    ]
+    
+    for resource in resources:
+        st.markdown(f"• **[{resource['title']}]({resource['url']})** - {resource['description']}")
+    
+    # Interactive Demo
+    st.markdown("---")
+    st.subheader("🎮 Try It Yourself")
+    st.markdown("**Practice rubber duck debugging with this example:**")
+    
+    example_problem = st.selectbox(
+        "Choose a debugging scenario:",
+        [
+            "Function returns wrong result",
+            "Loop doesn't terminate", 
+            "Variable not updating",
+            "Error handling missing"
+        ]
+    )
+    
+    if example_problem == "Function returns wrong result":
+        st.code("""
+def calculate_average(numbers):
+    total = 0
+    for num in numbers:
+        total += num
+    return total / len(numbers) + 1  # Bug: Why +1?
+        """)
+        st.markdown("**🦆 Rubber duck questions to ask:**")
+        st.markdown("- What should this function return?")
+        st.markdown("- What does each line do?")
+        st.markdown("- Why is there a +1 at the end?")
+        st.markdown("- What happens with edge cases?")
+    
+    elif example_problem == "Loop doesn't terminate":
+        st.code("""
+i = 0
+while i < 10:
+    print(f"Iteration {i}")
+    # Bug: Missing increment!
+        """)
+        st.markdown("**🦆 Questions to explore:**")
+        st.markdown("- What makes this loop stop?")
+        st.markdown("- When does i change?")
+        st.markdown("- What's the exit condition?")
+
+
     # Footer
     st.markdown("---")
     st.markdown("""
