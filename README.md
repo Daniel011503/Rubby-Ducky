@@ -17,8 +17,8 @@ Your intelligent rubber duck debugging assistant powered by CodeBERT neural netw
 
 ```bash
 # Clone the repository
-git clone https://github.com/Daniel011503/AI-Coding-Assist-.git
-cd llama-coding-assistant
+git clone https://github.com/Daniel011503/Rubby-Ducky.git
+cd Rubby-Ducky
 
 # Create and activate virtual environment
 python -m venv llama-env
@@ -161,12 +161,11 @@ def buggy_function(x):
 ## 📁 Project Structure
 
 ```
-llama-coding-assistant/
+Rubby-Ducky/
 ├── src/
 │   ├── multi_language_processor.py  # Main analysis engine
 │   ├── streamlit_app_clean.py       # Web interface
-│   ├── inference.py                 # AI model integration
-│   └── web_interface.py             # Additional web components
+│   └── rule_engine.py               # Rule-based detection engine
 ├── data/
 │   └── rules/                       # Language-specific rule databases
 │       ├── python_rules.json
@@ -305,8 +304,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Daniel011503/AI-Coding-Assist-/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/Daniel011503/AI-Coding-Assist-/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/Daniel011503/Rubby-Ducky/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Daniel011503/Rubby-Ducky/discussions)
 - 📧 **Feature Requests**: Create an issue with the "enhancement" label
 
 ---
