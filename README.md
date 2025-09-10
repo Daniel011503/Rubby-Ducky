@@ -79,11 +79,11 @@ Rubby Ducky uses a sophisticated multi-layer approach:
 
 ### 2. Analysis Categories
 
-| Severity | Examples | AI Confidence |
-|----------|----------|---------------|
-| **High** | Syntax errors, security vulnerabilities | Buggy (80-90%) |
-| **Medium** | Logic errors, missing patterns | Depends on count |
-| **Low** | Style issues, magic numbers | Clean (85-98%) |
+| Severity   | Examples                                | AI Confidence    |
+| ---------- | --------------------------------------- | ---------------- |
+| **High**   | Syntax errors, security vulnerabilities | Buggy (80-90%)   |
+| **Medium** | Logic errors, missing patterns          | Depends on count |
+| **Low**    | Style issues, magic numbers             | Clean (85-98%)   |
 
 ### 3. Language-Specific Rules
 
@@ -101,25 +101,25 @@ Each language has tailored detection patterns:
 
 ### Accuracy Metrics
 
-| Language | Clean Code Accuracy | False Positive Rate | Confidence Range |
-|----------|-------------------|-------------------|------------------|
-| **Python** | 98.0% | <2% | 90-98% |
-| **JavaScript** | 90.0% | <5% | 85-95% |
-| **Java** | 85.0% | <8% | 80-90% |
-| **C++** | 85.0% | <8% | 80-90% |
-| **C#** | 90.0% | <5% | 85-95% |
-| **Go** | 95.0% | <3% | 90-98% |
-| **Rust** | 92.0% | <4% | 88-96% |
+| Language       | Clean Code Accuracy | False Positive Rate | Confidence Range |
+| -------------- | ------------------- | ------------------- | ---------------- |
+| **Python**     | 98.0%               | <2%                 | 90-98%           |
+| **JavaScript** | 90.0%               | <5%                 | 85-95%           |
+| **Java**       | 85.0%               | <8%                 | 80-90%           |
+| **C++**        | 85.0%               | <8%                 | 80-90%           |
+| **C#**         | 90.0%               | <5%                 | 85-95%           |
+| **Go**         | 95.0%               | <3%                 | 90-98%           |
+| **Rust**       | 92.0%               | <4%                 | 88-96%           |
 
 ### System Requirements
 
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| RAM | 4GB | 8GB+ |
-| CPU | Any modern CPU | Multi-core |
-| Storage | 1GB | 2GB+ |
-| Python | 3.8+ | 3.9+ |
-| GPU | **Not Required** | N/A |
+| Component | Minimum          | Recommended |
+| --------- | ---------------- | ----------- |
+| RAM       | 4GB              | 8GB+        |
+| CPU       | Any modern CPU   | Multi-core  |
+| Storage   | 1GB              | 2GB+        |
+| Python    | 3.8+             | 3.9+        |
+| GPU       | **Not Required** | N/A         |
 
 ### Performance Benchmarks
 
@@ -143,6 +143,7 @@ def calculate_factorial(n: int) -> int:
 ```
 
 **Result**: 🤖 AI Analysis: Clean (confidence: 98.0%)
+
 - ✅ No issues detected! Your code looks good.
 
 ### Buggy Code Example (Python)
@@ -155,6 +156,7 @@ def buggy_function(x):
 ```
 
 **Result**: 🤖 AI Analysis: Buggy (confidence: 90.0%)
+
 - 🚨 Line 2: Assignment (=) used instead of comparison (==)
 - 🚨 Line 4: Undefined variable 'undefined_variable'
 
@@ -219,13 +221,13 @@ Add custom rules to language-specific JSON files:
 
 ### Current Status vs Leading Tools
 
-| Feature | Rubby Ducky | GitHub Copilot | CodeT5 | GPT-4 Code |
-|---------|-------------|----------------|---------|------------|
-| **Languages** | 7 | 12+ | 8+ | 20+ |
-| **Speed** | 300-600ms | 1-3s | 2-5s | 3-10s |
-| **Accuracy** | 85-98% | 95%+ | 90%+ | 95%+ |
-| **Offline** | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
-| **Cost** | 🆓 Free | 💰 $10/mo | 🆓 Free | 💰 $20/mo |
+| Feature            | Rubby Ducky   | GitHub Copilot  | CodeT5     | GPT-4 Code      |
+| ------------------ | ------------- | --------------- | ---------- | --------------- |
+| **Languages**      | 7             | 12+             | 8+         | 20+             |
+| **Speed**          | 300-600ms     | 1-3s            | 2-5s       | 3-10s           |
+| **Accuracy**       | 85-98%        | 95%+            | 90%+       | 95%+            |
+| **Offline**        | ✅ Yes        | ❌ No           | ✅ Yes     | ❌ No           |
+| **Cost**           | 🆓 Free       | 💰 $10/mo       | 🆓 Free    | 💰 $20/mo       |
 | **Specialization** | Bug Detection | Code Completion | Code Tasks | General Purpose |
 
 ### Areas for Improvement
@@ -239,18 +241,21 @@ Add custom rules to language-specific JSON files:
 ## 🚀 Roadmap for Model Improvement
 
 ### Phase 1: Model Upgrade (Immediate)
+
 - [ ] Integrate Code Llama 2 (7B/13B)
 - [ ] Fine-tune on bug detection datasets
 - [ ] Implement quantization for faster inference
 - [ ] Add confidence calibration
 
 ### Phase 2: Enhanced Features (3-6 months)
+
 - [ ] Multi-file context analysis
 - [ ] Code explanation generation
 - [ ] Automated fix suggestions
 - [ ] Integration with popular IDEs
 
 ### Phase 3: Advanced AI (6-12 months)
+
 - [ ] Custom training pipeline
 - [ ] Retrieval-augmented generation (RAG)
 - [ ] Multi-modal code understanding
@@ -312,4 +317,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ⭐ **Star this repository if Rubby Ducky helped debug your code!** ⭐
 
-*"If you're going to talk to a duck about your code, why not make it a smart duck?"* 🦆✨
+_"If you're going to talk to a duck about your code, why not make it a smart duck?"_ 🦆✨

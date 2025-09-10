@@ -1,25 +1,73 @@
 """
-Rubby Ducky Chat Assistant - For rubber duck debugging conversations.
+Rubby Duck Chatbot - Interactive rubber duck debugging assistant
 """
 
 import re
-from typing import List, Dict, Any
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-import torch
+import random
+from typing import Dict, List, Any, Optional
+
+try:
+    import torch
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    torch = None
 
 
 class RubbyChatBot:
     """A friendly chatbot for rubber duck debugging conversations."""
     
-    def __init__(self):
+    def __init__(self, use_ai_model=False):
         self.conversation_history = []
         self.code_context = ""
         self.analysis_results = {}
         
-        # Use rule-based responses by default for better debugging assistance
-        # The AI model can be enabled later for more advanced conversations
-        self.chat_pipeline = False
-        print("� Rubby Chat initialized with rule-based responses (optimized for debugging)")
+        if use_ai_model and TRANSFORMERS_AVAILABLE:
+            try:
+                # Try Phi-3-mini first - lightweight, fast, coding-optimized
+                print("🦆 Loading Phi-3-mini model for fast AI debugging conversations...")
+                model_name = "microsoft/Phi-3-mini-4k-instruct"
+                self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    model_name,
+                    torch_dtype=torch.float16,
+                    device_map="auto",
+                    trust_remote_code=True
+                )
+                
+                if self.tokenizer.pad_token is None:
+                    self.tokenizer.pad_token = self.tokenizer.eos_token
+                
+                self.chat_pipeline = True
+                print("🤖 Rubby Chat initialized with Phi-3-mini (fast & coding-optimized)")
+                
+            except Exception as e:
+                print(f"⚠️ Could not load Phi-3-mini: {e}")
+                try:
+                    # Fallback to CodeGemma-2B - even lighter
+                    print("🦆 Trying CodeGemma-2B as fallback...")
+                    model_name = "google/codegemma-2b-it"
+                    self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+                    self.model = AutoModelForCausalLM.from_pretrained(
+                        model_name,
+                        torch_dtype=torch.float16,
+                        device_map="auto"
+                    )
+                    
+                    if self.tokenizer.pad_token is None:
+                        self.tokenizer.pad_token = self.tokenizer.eos_token
+                    
+                    self.chat_pipeline = True
+                    print("🤖 Rubby Chat initialized with CodeGemma-2B (lightweight coding model)")
+                    
+                except Exception as e2:
+                    print(f"⚠️ Could not load CodeGemma: {e2}")
+                    print("💬 Using rule-based responses (still excellent for debugging!)")
+                    self.chat_pipeline = False
+        else:
+            self.chat_pipeline = False
+            print("🦆 Rubby Chat initialized with rule-based responses")
     
     def set_code_context(self, code: str, language: str, analysis_results: Dict[str, Any] = None):
         """Set the current code being discussed."""
@@ -27,7 +75,6 @@ class RubbyChatBot:
         self.language = language
         self.analysis_results = analysis_results or {}
         
-        # Add context to conversation
         context_msg = f"I'm looking at your {language} code. "
         if analysis_results:
             if analysis_results.get('prediction') == 'clean':
@@ -42,189 +89,111 @@ class RubbyChatBot:
     
     def chat(self, user_message: str) -> str:
         """Have a conversation with the user about their code."""
-        # Add user message to history
         self.conversation_history.append({
             'role': 'user', 
             'content': user_message
         })
         
-        # Generate response
         if self.chat_pipeline:
             response = self._generate_ai_response(user_message)
         else:
             response = self._generate_rule_based_response(user_message)
         
-        # Add response to history
         self.conversation_history.append({
             'role': 'assistant',
             'content': response
         })
         
         return response
-    
+
     def _generate_ai_response(self, user_message: str) -> str:
         """Generate response using AI model."""
         try:
-            # Prepare conversation context
-            chat_history_ids = None
+            conversation_context = ""
+            if self.code_context:
+                conversation_context += f"Code context ({self.language}):\n```\n{self.code_context[:500]}...\n```\n\n"
             
-            # Encode the new user input and add special tokens
-            new_user_input_ids = self.tokenizer.encode(
-                user_message + self.tokenizer.eos_token, 
-                return_tensors='pt'
-            )
+            recent_messages = self.conversation_history[-4:] if len(self.conversation_history) > 4 else self.conversation_history[:-1]
+            for msg in recent_messages:
+                if msg['role'] == 'user':
+                    conversation_context += f"User: {msg['content']}\n"
+                elif msg['role'] == 'assistant':
+                    conversation_context += f"Assistant: {msg['content']}\n"
             
-            # Build conversation context
-            if len(self.conversation_history) > 2:
-                # Get last few messages for context
-                recent_history = self.conversation_history[-4:]
-                context = ""
-                for msg in recent_history[:-1]:  # Exclude the current user message we just added
-                    if msg['role'] == 'user':
-                        context += f"User: {msg['content']}\n"
-                    else:
-                        context += f"Assistant: {msg['content']}\n"
-                
-                chat_history_ids = self.tokenizer.encode(
-                    context + self.tokenizer.eos_token,
-                    return_tensors='pt'
-                )
+            prompt = f"""You are Rubby, a friendly rubber duck debugging assistant.
+
+{conversation_context}
+
+User: {user_message}
+
+Respond as Rubby. Be helpful and encouraging. Start with 🦆."""
+
+            inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
             
-            # Generate response
             with torch.no_grad():
-                if chat_history_ids is not None:
-                    bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1)
-                else:
-                    bot_input_ids = new_user_input_ids
-                
-                chat_history_ids = self.model.generate(
-                    bot_input_ids,
-                    max_length=min(200, bot_input_ids.shape[-1] + 50),
-                    num_beams=5,
-                    no_repeat_ngram_size=2,
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=150,
                     temperature=0.7,
                     do_sample=True,
-                    pad_token_id=self.tokenizer.eos_token_id
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    eos_token_id=self.tokenizer.eos_token_id
                 )
             
-            # Decode response
-            response = self.tokenizer.decode(
-                chat_history_ids[:, bot_input_ids.shape[-1]:][0], 
-                skip_special_tokens=True
-            )
+            response = self.tokenizer.decode(outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
+            response = response.strip()
             
-            # Clean up and add rubber duck personality
-            response = self._add_duck_personality(response.strip())
+            if not response.startswith('🦆'):
+                response = '🦆 ' + response
             
-            return response or self._generate_rule_based_response(user_message)
+            return response
             
         except Exception as e:
             print(f"AI response error: {e}")
             return self._generate_rule_based_response(user_message)
-    
+
     def _generate_rule_based_response(self, user_message: str) -> str:
         """Generate response using rule-based patterns."""
-        message_lower = user_message.lower()
+        user_lower = user_message.lower()
         
-        # Specific Python syntax issues
-        if 'semicolon' in message_lower and 'python' in message_lower:
-            return "🦆 Aha! I see the issue! In Python, you don't need semicolons (;) at the end of lines like in Java, C++, or JavaScript. Python uses newlines and indentation instead!\n\n" \
-                   "❌ Wrong: `print('hello');`\n" \
-                   "✅ Correct: `print('hello')`\n\n" \
-                   "Just remove all the semicolons from the end of your lines and your Python code should work perfectly! Can you show me your code so we can fix it together?"
-        
-        elif ('semicolon' in message_lower or ';' in user_message) and ('error' in message_lower or 'issue' in message_lower):
-            return "🦆 Semicolon troubles! What programming language are you using? Different languages have different rules:\n\n" \
-                   "• **Python**: No semicolons needed\n" \
-                   "• **JavaScript/Java/C++**: Semicolons required\n" \
-                   "• **Go**: Semicolons optional (added automatically)\n\n" \
-                   "Can you tell me which language and show me the error message?"
-        
-        # Indentation issues  
-        elif 'indentation' in message_lower or 'indent' in message_lower:
-            return "🦆 Indentation is crucial in Python! Unlike other languages that use braces {}, Python uses indentation to define code blocks.\n\n" \
-                   "Make sure you're using consistent spaces (4 spaces is standard) or tabs, but not both! Can you show me the specific lines that are giving you trouble?"
+        # Python semicolon issue
+        if any(keyword in user_lower for keyword in ['semicolon', ';', 'python']) and \
+           any(keyword in user_lower for keyword in ['error', 'problem', 'wrong', 'issue']):
+            return "🦆 Aha! I see the issue! In Python, you don't need semicolons at the end of lines. " \
+                   "Unlike languages like Java or C++, Python uses indentation and line breaks to define code structure. " \
+                   "Try removing those semicolons and your code should work perfectly! " \
+                   "Is there anything specific about the error message you'd like me to explain?"
         
         # Syntax error patterns
-        elif 'syntax error' in message_lower:
-            return "🦆 Syntax errors are the easiest to fix once you know what to look for! Can you share the exact error message and the line of code it's pointing to? " \
-                   "Let's walk through it character by character - often it's just a missing quote, bracket, or parenthesis!"
+        if any(keyword in user_lower for keyword in ['syntax error', 'syntaxerror', 'invalid syntax']):
+            return "🦆 Syntax errors are like typos in code! Let's debug this step by step:\n" \
+                   "1. Check for missing parentheses, brackets, or quotes\n" \
+                   "2. Look at the line number in the error message\n" \
+                   "3. Sometimes the real error is actually on the line BEFORE the reported line\n" \
+                   "4. Check your indentation - Python is picky about that!\n" \
+                   "Can you share the exact error message and the line it's pointing to?"
         
-        # Rubber duck debugging responses  
-        elif any(word in message_lower for word in ['bug', 'error', 'wrong', 'broken', 'issue']):
-            if self.analysis_results:
-                issues = self.analysis_results.get('issues', [])
-                if issues:
-                    return f"🦆 I see you're having trouble! I found {len(issues)} potential issues in your code. Let's walk through them step by step. What specific behavior are you seeing that's unexpected?"
-                else:
-                    return "🦆 Hmm, I didn't find any obvious issues in the code analysis. Can you tell me more about what's happening? Sometimes the best debugging happens when you explain the problem out loud!"
-            else:
-                return "🦆 Tell me more about the bug you're experiencing. What did you expect to happen, and what actually happened? Walking through it step by step often helps!"
+        # Greeting responses
+        if any(greeting in user_lower for greeting in ['hello', 'hi', 'hey', 'help']):
+            return "🦆 Hello there! I'm Rubby, your friendly rubber duck debugging companion! " \
+                   "I'm here to help you work through any coding problems. Just explain what you're " \
+                   "working on and what issues you're facing!"
         
-        elif any(word in message_lower for word in ['explain', 'understand', 'how', 'why', 'what']):
-            if self.code_context:
-                return "🦆 Great question! I'm looking at your code right now. Can you point me to the specific part you'd like me to explain? Sometimes explaining code line by line helps you spot issues too!"
-            else:
-                return "🦆 I'd love to help explain! Can you share the specific code you're curious about? The act of describing what each part does often leads to insights!"
-        
-        elif any(word in message_lower for word in ['fix', 'solve', 'help']):
-            return "🦆 Let's tackle this together! The rubber duck method works best when YOU do the explaining. Can you walk me through what your code is supposed to do, step by step? I'll listen and ask questions along the way!"
-        
-        elif any(word in message_lower for word in ['thanks', 'thank', 'good', 'great', 'awesome']):
-            return "🦆 Quack! I'm happy to help! Remember, the best debugging often happens when you explain your problem out loud. Keep talking through your code - you've got this!"
-        
-        elif any(word in message_lower for word in ['hello', 'hi', 'hey', 'start']):
-            return "🦆 Hello there! I'm Rubby, your rubber duck debugging assistant! Share your code with me and let's talk through any issues you're having. What are you working on today?"
-        
-        elif 'logic' in message_lower or 'algorithm' in message_lower:
-            return "🦆 Logic issues can be tricky! Try explaining to me what your algorithm is supposed to do in plain English, then we can compare that to what the code actually does. Where do you think the logic might be going wrong?"
-        
-        elif any(word in message_lower for word in ['performance', 'slow', 'fast', 'optimize']):
-            return "🦆 Performance questions! Tell me about where you think the bottleneck might be. Have you identified which part of your code is running slowly? Sometimes explaining the data flow helps spot inefficiencies!"
-        
-        elif any(word in message_lower for word in ['test', 'testing']):
-            return "🦆 Testing is so important! What kind of test cases have you tried? Walk me through what inputs you're testing and what outputs you expect. Edge cases often reveal bugs!"
-        
+        # Generic fallback
+        if self.code_context:
+            responses = [
+                "🦆 I'm looking at your code! Can you tell me more about what specific issue you're seeing?",
+                "🦆 Let's debug this together! What behavior are you expecting vs. what's actually happening?",
+                "🦆 Perfect! I have your code context. Walk me through what you think should happen step by step.",
+            ]
         else:
-            # More helpful generic responses based on context
-            if 'python' in message_lower:
-                responses = [
-                    "🦆 Python questions are my favorite! What specific part of your Python code are you curious about?",
-                    "🦆 Let's talk Python! Can you share the code you're working with so I can help better?",
-                    "🦆 Python can be tricky sometimes! What's the specific issue you're facing?",
-                ]
-            elif any(lang in message_lower for lang in ['javascript', 'java', 'c++', 'rust', 'go']):
-                responses = [
-                    "🦆 Great choice of language! What specific problem are you trying to solve?",
-                    "🦆 I'd love to help with your code! Can you share what you're working on?",
-                    "🦆 Tell me more about what you're trying to accomplish with your code!",
-                ]
-            else:
-                responses = [
-                    "🦆 I'm here to help debug! Can you share your code and describe what issue you're facing?",
-                    "🦆 Let's work through this together! What specific problem are you trying to solve?",
-                    "🦆 I'm listening! The more details you can share about your code issue, the better I can help.",
-                    "🦆 Rubber duck debugging works best when you explain your problem step by step. What's going on?",
-                    "🦆 I'm ready to help! Can you describe what your code is supposed to do vs what it's actually doing?"
-                ]
-            import random
-            return random.choice(responses)
-    
-    def _add_duck_personality(self, response: str) -> str:
-        """Add rubber duck personality to responses."""
-        if not response:
-            return "🦆 Quack! I'm here to help! What would you like to discuss about your code?"
+            responses = [
+                "🦆 I'm here to help debug! Can you share your code and describe what issue you're facing?",
+                "🦆 Let's work through this together! What specific problem are you trying to solve?",
+                "🦆 I'm listening! The more details you can share about your code issue, the better I can help.",
+            ]
         
-        # Add duck emoji if not present
-        if '🦆' not in response:
-            response = "🦆 " + response
-        
-        # Ensure encouraging tone
-        if not any(word in response.lower() for word in ['!', 'great', 'good', 'awesome', 'excellent']):
-            if response.endswith('.'):
-                response = response[:-1] + "!"
-        
-        return response
+        return random.choice(responses)
     
     def get_conversation_history(self) -> List[Dict[str, str]]:
         """Get the full conversation history."""
@@ -245,8 +214,8 @@ class RubbyChatBot:
             "🎯 Identify the smallest piece that doesn't work as expected",
             "📝 Write down your assumptions and test them",
             "🔄 Try explaining the problem to someone else (or me!)",
-            "🧪 Create simple test cases to isolate the issue",
-            "📊 Add print statements to see variable values",
-            "🤔 Consider edge cases and boundary conditions",
-            "⏰ Take a break and come back with fresh eyes"
+            "🧪 Test with the simplest possible input first",
+            "🔬 Use print statements to see what's happening",
+            "📚 Check the documentation for functions you're using",
+            "🎭 Step through your code line by line in a debugger"
         ]

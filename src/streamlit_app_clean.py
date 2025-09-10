@@ -159,6 +159,17 @@ def main():
         elif mode == "💬 Chat with Rubby":
             st.header("🦆 Chat Settings")
             
+            # Model selection
+            ai_mode = st.selectbox(
+                "Choose Chat Mode:",
+                [
+                    "🧠 AI Model (Phi-3-mini) - Smart conversations", 
+                    "⚡ Rule-based (Fast & Reliable) - Backup mode"
+                ],
+                index=0,
+                help="AI models provide more natural conversations but require more resources"
+            )
+            
             if st.button("🗑️ Clear Chat History"):
                 if 'chatbot' in st.session_state:
                     st.session_state.chatbot.clear_conversation()
@@ -173,6 +184,12 @@ def main():
             - Share error messages you're seeing
             - Discuss your debugging approach
             """)
+            
+            # Show current mode info
+            if "AI Model" in ai_mode:
+                st.info("🤖 **AI Mode**: More natural conversations, requires model download (~6GB)")
+            else:
+                st.success("⚡ **Rule-based Mode**: Fast, reliable responses optimized for debugging")
         
         else:  # Learning Hub
             st.header("📚 Resources")
@@ -359,11 +376,43 @@ def show_chat_mode():
     st.header("💬 Chat with Rubby")
     st.markdown("*Have a conversation about your code - true rubber duck debugging!*")
     
-    # Initialize chatbot if not exists
+    # Model selection in main area
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        ai_mode = st.selectbox(
+            "Choose Chat Mode:",
+            [
+                "🧠 AI Model (Phi-3-mini) - Smart conversations", 
+                "⚡ Rule-based (Fast & Reliable) - Backup mode"
+            ],
+            index=0,
+            help="AI model provides intelligent conversations (~2GB download on first use). Rule-based mode offers instant responses."
+        )
+    
+    with col2:
+        if st.button("🔄 Reload Model", help="Switch between AI and rule-based mode"):
+            if 'chatbot' in st.session_state:
+                del st.session_state.chatbot
+            st.rerun()
+    
+    # Initialize chatbot with selected mode
+    use_ai = "AI Model" in ai_mode
+    
     if 'chatbot' not in st.session_state:
-        st.session_state.chatbot = RubbyChatBot()
+        try:
+            with st.spinner("🦆 Initializing Rubby..."):
+                st.session_state.chatbot = RubbyChatBot(use_ai_model=use_ai)
+        except Exception as e:
+            st.error(f"Could not initialize AI model: {e}")
+            st.session_state.chatbot = RubbyChatBot(use_ai_model=False)
     
     chatbot = st.session_state.chatbot
+    
+    # Show current mode status
+    if chatbot.chat_pipeline:
+        st.success("🤖 **AI Mode Active**: Enhanced conversational responses")
+    else:
+        st.info("⚡ **Rule-based Mode**: Fast, reliable debugging assistance")
     
     # Code context section
     with st.expander("📝 Share Code for Discussion", expanded=False):
